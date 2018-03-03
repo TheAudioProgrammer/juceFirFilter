@@ -22,7 +22,7 @@ JuceFirfilterExampleAudioProcessor::JuceFirfilterExampleAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       ), tree(*this, nullptr)
+                       ), tree(*this, nullptr), lowPassFilter(dsp::FilterDesign<float>::designFIRLowpassWindowMethod(20000.0f, 44100, 21, dsp::WindowingFunction <float>::hamming))
 #endif
 {
     NormalisableRange<float> cutoffRange (20.0f, 20000.0f);
@@ -104,6 +104,10 @@ void JuceFirfilterExampleAudioProcessor::prepareToPlay (double sampleRate, int s
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumOutputChannels();
+    
+    lowPassFilter.reset();
+    updateFilter();
+    lowPassFilter.prepare(spec);
 }
 
 void JuceFirfilterExampleAudioProcessor::releaseResources()
@@ -136,6 +140,13 @@ bool JuceFirfilterExampleAudioProcessor::isBusesLayoutSupported (const BusesLayo
 }
 #endif
 
+void JuceFirfilterExampleAudioProcessor::updateFilter()
+{
+    float freq = *tree.getRawParameterValue("cutoff");
+    
+    *lowPassFilter.state = *dsp::FilterDesign<float>::designFIRLowpassWindowMethod(freq, 44100, 21, dsp::WindowingFunction <float>::hamming);
+}
+
 void JuceFirfilterExampleAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
@@ -146,6 +157,9 @@ void JuceFirfilterExampleAudioProcessor::processBlock (AudioBuffer<float>& buffe
 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+    
+    updateFilter();
+    lowPassFilter.process(dsp::ProcessContextReplacing<float> (block));
     
 }
 
