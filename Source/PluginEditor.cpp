@@ -27,16 +27,7 @@ JuceFirfilterExampleAudioProcessorEditor::JuceFirfilterExampleAudioProcessorEdit
     filterCutoffDial.setPopupDisplayEnabled(true, true, this);
     addAndMakeVisible(&filterCutoffDial);
     
-    filterResDial.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    filterResDial.setRange(1.0f, 5.0f);
-    filterResDial.setValue(2.0f);
-    filterResDial.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
-    filterResDial.setPopupDisplayEnabled(true, true, this);
-    addAndMakeVisible(&filterResDial);
-    
     filterCutoffValue = new AudioProcessorValueTreeState::SliderAttachment (processor.tree, "cutoff", filterCutoffDial);
-    
-    filterResValue = new AudioProcessorValueTreeState::SliderAttachment (processor.tree, "resonance", filterResDial);
     
     filterCutoffDial.setSkewFactorFromMidPoint(1000.0f);
 }
@@ -53,9 +44,7 @@ void JuceFirfilterExampleAudioProcessorEditor::paint (Graphics& g)
     
     g.fillAll (Colours::black);
     g.setColour(Colours::white);
-    g.drawText("Filter", titleArea, Justification::centredTop);
-    g.drawText("Cutoff", 46, 70, 50, 25, Justification::centredLeft);
-    g.drawText("Resonance", 107, 70, 70, 25, Justification::centredLeft);
+    g.drawText("FIR Low Pass Filter", titleArea, Justification::centredTop);
     
     Rectangle <float> area (25, 25, 150, 150);
     
@@ -68,6 +57,5 @@ void JuceFirfilterExampleAudioProcessorEditor::resized()
     //need to come back and dynamically set these...ok for now
     Rectangle<int> area = getLocalBounds().reduced(40);
     
-    filterCutoffDial.setBounds (30, 90, 70, 70);
-    filterResDial.setBounds (100, 90, 70, 70);
+    filterCutoffDial.setBounds (area.getWidth() - 90, area.getHeight() - 90, 140, 140);
 }
